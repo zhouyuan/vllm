@@ -12,3 +12,8 @@ remove_docker_container
 
 # Run the image and launch offline inference
 docker run --network host --env VLLM_CPU_KVCACHE_SPACE=1 --name cpu-test cpu-test python3 examples/offline_inference.py
+
+# Run basic model test
+docker exec cpu-test -itd bash -c "cd tests;
+  bash ../.buildkite/download-images.sh
+  pytest -v -s models --ignore=models/test_llava.py --ignore=models/test_mistral.py"

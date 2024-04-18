@@ -154,18 +154,20 @@ class HfRunner:
         torch_dtype = _STR_DTYPE_TO_TORCH_DTYPE[dtype]
         self.model_name = model_name
         if model_name not in _VISION_LANGUAGE_MODELS:
-            self.model = self.wrap_device(AutoModelForCausalLM.from_pretrained(
-                model_name,
-                torch_dtype=torch_dtype,
-                trust_remote_code=True,
-            ))
+            self.model = self.wrap_device(
+                AutoModelForCausalLM.from_pretrained(
+                    model_name,
+                    torch_dtype=torch_dtype,
+                    trust_remote_code=True,
+                ))
             self.processor = None
         else:
-            self.model = self.wrap_device(_VISION_LANGUAGE_MODELS[model_name].from_pretrained(
-                model_name,
-                torch_dtype=torch_dtype,
-                trust_remote_code=True,
-            ))
+            self.model = self.wrap_device(
+                _VISION_LANGUAGE_MODELS[model_name].from_pretrained(
+                    model_name,
+                    torch_dtype=torch_dtype,
+                    trust_remote_code=True,
+                ))
             self.processor = AutoProcessor.from_pretrained(
                 model_name,
                 torch_dtype=torch_dtype,

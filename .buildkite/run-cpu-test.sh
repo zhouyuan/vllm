@@ -28,3 +28,8 @@ docker exec cpu-test bash -c "cd tests;
   sed -i 's/cuda/cpu/g' conftest.py
   bash ../.buildkite/download-images.sh
   pytest -v -s models --ignore=models/test_llava.py --ignore=models/test_mistral.py --ignore=models/test_marlin.py --ignore=models/test_big_models.py"
+
+# Run big model test
+docker exec cpu-test bash -c "cd tests;
+  sed -i 's/half/float/g' models/test_big_models.py
+  pytest -v -s models/test_big_models.py"

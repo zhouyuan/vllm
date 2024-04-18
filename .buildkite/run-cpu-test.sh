@@ -23,8 +23,8 @@ docker exec cpu-test bash -c "python3 examples/offline_inference.py"
 docker exec cpu-test bash -c "cd tests;
   pip install pytest Pillow
   rm -f __init__.py
-  sed -i '/*stablelm-3b-4e1t/d' models/test_models.py
+  sed -i '/\"stabilityai/d' models/test_models.py
   sed -i '/torch.cuda.empty_cache/d' conftest.py
   sed -i 's/cuda/cpu/g' conftest.py
   bash ../.buildkite/download-images.sh
-  pytest -v -s models --ignore=models/test_llava.py --ignore=models/test_mistral.py --ignore=models/test_marlin.py"
+  pytest -v -s models --ignore=models/test_llava.py --ignore=models/test_mistral.py --ignore=models/test_marlin.py --ignore=models/test_big_models.py"

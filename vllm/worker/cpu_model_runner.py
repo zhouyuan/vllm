@@ -1,13 +1,14 @@
 from typing import Dict, List, Optional, Tuple
 
 import torch
+import time
 from torch import nn
 
 from vllm.attention import AttentionMetadata, get_attn_backend
 from vllm.config import (DeviceConfig, LoadConfig, LoRAConfig, ModelConfig,
                          ParallelConfig, SchedulerConfig, VisionLanguageConfig)
 from vllm.distributed import broadcast_tensor_dict
-from vllm.logger import init_logger
+from vllm.logger import init_logger, init_perf_logger
 from vllm.model_executor import SamplingMetadata
 from vllm.model_executor.model_loader import get_model
 from vllm.sampling_params import SamplingParams, SamplingType
@@ -15,6 +16,7 @@ from vllm.sequence import SamplerOutput, SequenceData, SequenceGroupMetadata
 from vllm.utils import make_tensor_with_pad, maybe_expand_dim
 
 logger = init_logger(__name__)
+perf_logger = init_perf_logger(__name__)
 
 _PAD_SLOT_ID = -1
 
@@ -415,10 +417,16 @@ class CPUModelRunner:
         if self.vision_language_config:
             execute_model_kwargs.update({"image_input": multi_modal_input})
 
+        gen_token_start_time=time.perf_counter_ns()
         hidden_states = model_executable(**execute_model_kwargs)
 
         # Compute the logits.
         logits = self.model.compute_logits(hidden_states, sampling_metadata)
+
+        gen_token_end_time = time.perf_counter_ns()
+        token_latency_ns = gen_token_end_time - gen_token_start_time
+        token_latency_s = token_latency_ns / 1e9
+        perf_logger.info("{}".format(token_latency_s))
 
         # Only perform sampling in the driver worker.
         if not sampling_metadata.perform_sampling:

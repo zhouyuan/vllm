@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Optional
 
 import numpy as np
+import csv
 import torch
 from tqdm import tqdm
 
@@ -93,6 +94,40 @@ def main(args: argparse.Namespace):
     for percentage, percentile in zip(percentages, percentiles):
         print(f'{percentage}% percentile latency: {percentile} seconds')
 
+    def read_csv(file_path):
+        with open(file_path, mode='r', newline='') as file:
+            reader = csv.reader(file)  # Using reader instead of DictReader
+            data = [float(row[0]) for row in reader]  # Assuming the latency values are in the first column
+        return data
+
+    def compute_percentiles(latencies, percentages):
+        latencies.sort()
+        n = len(latencies)
+        return [latencies[int(p/100.0 * n)] for p in percentages]
+
+    file_path = 'perf_vllm.worker.cpu_model_runner_log.csv'
+
+    data = read_csv(file_path)
+
+    num_iters_warmup = args.num_iters_warmup
+    num_iters = args.num_iters
+    output_len = args.output_len
+
+    warmup_lines = num_iters_warmup * output_len
+    official_lines = num_iters * output_len
+    official_data = data[warmup_lines:warmup_lines + official_lines]
+
+    first_token_latencies = [official_data[i] for i in range(0, official_lines, output_len)]
+    next_token_latencies = [official_data[i] for i in range(1, official_lines, output_len)]
+
+    average_first_token_latency = sum(first_token_latencies) / len(first_token_latencies)
+
+    percentages = [10, 25, 50, 75, 90]
+    percentiles = compute_percentiles(next_token_latencies, percentages)
+
+    print(f'first_token_latency: {average_first_token_latency:.6f} seconds')
+    for percentage, percentile in zip(percentages, percentiles):
+        print(f'{percentage}% percentile latency: {percentile:.6f} seconds')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(

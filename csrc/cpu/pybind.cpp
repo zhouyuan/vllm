@@ -33,6 +33,10 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
   ops.def("rotary_embedding", &rotary_embedding,
           "Apply GPT-NeoX or GPT-J style rotary embedding to query and key");
 
+  // Quant
+  ops.def("static_scaled_fp8_quant", &static_scaled_fp8_quant,
+          "Apply Quant FP8");
+
   // Cache ops
   pybind11::module cache_ops = m.def_submodule("cache_ops", "vLLM cache ops");
   cache_ops.def("swap_blocks", &swap_blocks,

@@ -244,12 +244,17 @@ class Fp8LinearMethod(LinearMethodBase):
         # torch._scaled_mm is more performant for matrices with
         # batch dimension > 16. Note that this could change
         # in the future.
-        output, _ = torch._scaled_mm(
-            qinput,
-            layer.weight,
-            out_dtype=x.dtype,
-            scale_a=x_scale,
-            scale_b=layer.weight_scale,
+        #output, _ = torch._scaled_mm(
+        #    qinput,
+        #    layer.weight,
+        #    out_dtype=x.dtype,
+        #    scale_a=x_scale,
+        #    scale_b=layer.weight_scale,
+        #    bias=bias,
+        #)
+        output = torch.nn.functional.linear(
+            qinput.to(x.dtype) * x_scale,
+            (layer.weight.to(x.dtype) * layer.weight_scale.to(x.dtype)).T,
             bias=bias,
         )
 

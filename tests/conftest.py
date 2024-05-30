@@ -16,6 +16,7 @@ from vllm.distributed import destroy_model_parallel
 from vllm.inputs import TextPrompt
 from vllm.logger import init_logger
 from vllm.sequence import MultiModalData, SampleLogprobs
+from vllm.utils import is_cpu
 
 logger = init_logger(__name__)
 
@@ -55,7 +56,7 @@ def cleanup():
     with contextlib.suppress(AssertionError):
         torch.distributed.destroy_process_group()
     gc.collect()
-    if torch.cuda.is_available():
+    if not is_cpu():
         torch.cuda.empty_cache()
 
 
@@ -144,7 +145,7 @@ _EMBEDDING_MODELS = [
 class HfRunner:
 
     def wrap_device(self, input: any):
-        if torch.cuda.is_available():
+        if not is_cpu():
             return input.cuda()
         else:
             return input.cpu()

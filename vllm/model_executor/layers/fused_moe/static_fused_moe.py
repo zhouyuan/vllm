@@ -15,7 +15,7 @@ def silu_and_mul_wrapper(x: torch.Tensor) -> torch.Tensor:
     silu_and_mul(out, x)
     return out
 
-
+@torch.compile(dynamic=True)
 def static_fused_moe(hidden_states, w1, w2, score, topk):
     B, D = hidden_states.shape
     num_experts = w1.shape[0]

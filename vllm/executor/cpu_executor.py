@@ -70,17 +70,17 @@ class CPUExecutor(ExecutorBase):
         threads_num_per_node = torch.get_num_threads()
         nodes = ray.nodes()
 
-        for node in nodes:
-            node_thread_num = node["Resources"]["CPU"]
-            if threads_num_per_node != node_thread_num:
-                raise RuntimeError(
-                    f"Number of OMP threads {node_thread_num} in child node "
-                    f"doesn't match with the number {threads_num_per_node} in "
-                    "driver worker.") 
+        # for node in nodes:
+        #     node_thread_num = node["Resources"]["CPU"]
+        #     if threads_num_per_node != node_thread_num:
+        #         raise RuntimeError(
+        #             f"Number of OMP threads {node_thread_num} in child node "
+        #             f"doesn't match with the number {threads_num_per_node} in "
+        #             "driver worker.")
 
         if self.parallel_config.placement_group is None:
             placement_group_specs = (
-                [{"CPU": threads_num_per_node}] * \
+                [{"CPU": threads_num_per_node - 1}] * \
                 (self.parallel_config.world_size - 1))
             placement_group = ray.util.placement_group(
                 placement_group_specs, strategy="STRICT_SPREAD")
@@ -108,7 +108,7 @@ class CPUExecutor(ExecutorBase):
                 placement_group_bundle_index=bundle_id + bundle_offset,
             )
             child_worker = ray.remote(
-                num_cpus=threads_num_per_node,
+                num_cpus=threads_num_per_node - 1,
                 scheduling_strategy=scheduling_strategy
             )(CPUWorker).remote(
                 model_config=None,

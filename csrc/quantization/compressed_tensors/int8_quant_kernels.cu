@@ -1,5 +1,5 @@
 #include <ATen/cuda/CUDAContext.h>
-#include <torch/all.h>
+#include <torch/extension.h>
 #include <cmath>
 
 #include "../../dispatch_utils.h"

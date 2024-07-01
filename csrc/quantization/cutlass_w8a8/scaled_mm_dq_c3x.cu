@@ -4,7 +4,7 @@
 
 #if defined CUDA_VERSION && CUDA_VERSION >= 12000
 
-#include <torch/all.h>
+#include <torch/extension.h>
 
 #include <ATen/cuda/CUDAContext.h>
 

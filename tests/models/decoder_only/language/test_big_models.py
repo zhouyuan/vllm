@@ -24,9 +24,6 @@ if not current_platform.is_cpu():
     # MiniCPM requires fused_moe which is not supported by CPU
     MODELS.append("openbmb/MiniCPM3-4B")
 
-#TODO: remove this after CPU float16 support ready
-target_dtype = "float" if current_platform.is_cpu() else "half"
-
 
 @pytest.mark.parametrize("model", MODELS)
 @pytest.mark.parametrize("dtype", [target_dtype])
